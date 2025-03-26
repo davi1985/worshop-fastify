@@ -9,10 +9,21 @@ type Request = FastifyRequest<{
   Headers: { org: string };
 }>;
 
-fastify.post('/users/:id', (request: Request) => {
+fastify.post('/users/:id', (request: Request, reply) => {
   const { body, headers, query, params } = request;
 
-  return {
+  if(!body.name) {
+    return reply.code(400).send({message: 'body is missing'});
+  }
+
+  reply.headers({
+    'hearer1': 'header 1 value',
+    'hearer2': 'header 2 value',
+  });
+
+  console.log(reply.getHeaders());
+
+  reply.code(201).send({
     params: {
       id: params.id,
     },
@@ -25,7 +36,7 @@ fastify.post('/users/:id', (request: Request) => {
     headers: {
       org: headers.org,
     },
-  };
+  });
 });
 
 async function main() {
