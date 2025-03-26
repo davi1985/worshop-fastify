@@ -2,15 +2,11 @@ import Fastify from 'fastify';
 
 const fastify = Fastify();
 
-fastify.route({
-  method: 'GET',
-  url: '/teste',
-  handler: () => ({
-    hello: 'rota de test',
-  }),
-});
+fastify.post('/users/:id', (request) => {
+  const { body, headers, query, params } = request;
 
-fastify.get('/outro-teste', () => ({ hello: 'outro teste' }));
+  return { params, query, body, headers };
+});
 
 async function main() {
   try {
