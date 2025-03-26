@@ -1,11 +1,31 @@
-import Fastify from 'fastify';
+import Fastify, { type FastifyRequest } from 'fastify';
 
 const fastify = Fastify();
 
-fastify.post('/users/:id', (request) => {
+type Request = FastifyRequest<{
+  Params: { id: string };
+  Querystring: { page: string };
+  Body: { name: string };
+  Headers: { org: string };
+}>;
+
+fastify.post('/users/:id', (request: Request) => {
   const { body, headers, query, params } = request;
 
-  return { params, query, body, headers };
+  return {
+    params: {
+      id: params.id,
+    },
+    query: {
+      page: query.page,
+    },
+    body: {
+      name: body.name,
+    },
+    headers: {
+      org: headers.org,
+    },
+  };
 });
 
 async function main() {
