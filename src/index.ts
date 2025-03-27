@@ -3,6 +3,16 @@ import { randomUUID } from 'node:crypto';
 
 const fastify = Fastify();
 
+fastify.addContentTypeParser(['text/xml', 'application/xml'], async(request, payload, done) => {
+  const chunks = [];
+
+  for await (const chunk of payload) {
+    chunks.push(chunk);
+  }
+
+  return Buffer.concat(chunks).toString('utf8');
+});
+
 type Request = FastifyRequest<{
   Params: { id: string };
   Querystring: { page: string };
