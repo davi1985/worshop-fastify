@@ -1,4 +1,5 @@
 import Fastify, { type FastifyRequest } from 'fastify';
+import { randomUUID } from 'node:crypto';
 
 const fastify = Fastify();
 
@@ -7,13 +8,25 @@ type Request = FastifyRequest<{
   Querystring: { page: string };
   Body: { name: string };
   Headers: { org: string };
+  Reply: {
+    201: {
+      id: string
+    },
+    '4xx': {
+      code:string,
+      message: string
+    }
+  }
 }>;
 
-fastify.post('/users/:id', (request: Request, reply) => {
-  const { body, headers, query, params } = request;
+fastify.post('/users/:id', async(request: Request, reply) => {
+  const { body   } = request;
 
   if(!body.name) {
-    return reply.code(400).send({message: 'body is missing'});
+    return reply.code(400).send({
+      code: 'VALIDATION_ERROR',
+      message: 'any error message'
+    });
   }
 
   reply.headers({
@@ -24,18 +37,7 @@ fastify.post('/users/:id', (request: Request, reply) => {
   console.log(reply.getHeaders());
 
   reply.code(201).send({
-    params: {
-      id: params.id,
-    },
-    query: {
-      page: query.page,
-    },
-    body: {
-      name: body.name,
-    },
-    headers: {
-      org: headers.org,
-    },
+    id: randomUUID()
   });
 });
 
