@@ -3,16 +3,6 @@ import { randomUUID } from 'node:crypto';
 
 const fastify = Fastify();
 
-fastify.addContentTypeParser(['text/xml', 'application/xml'], async(request, payload, done) => {
-  const chunks = [];
-
-  for await (const chunk of payload) {
-    chunks.push(chunk);
-  }
-
-  return Buffer.concat(chunks).toString('utf8');
-});
-
 type Request = FastifyRequest<{
   Params: { id: string };
   Querystring: { page: string };
@@ -20,36 +10,47 @@ type Request = FastifyRequest<{
   Headers: { org: string };
   Reply: {
     201: {
-      id: string
-    },
+      id: string;
+    };
     '4xx': {
-      code:string,
-      message: string
-    }
-  }
+      code: string;
+      message: string;
+    };
+  };
 }>;
 
-fastify.post('/users/:id', async(request: Request, reply) => {
-  const { body   } = request;
+fastify.post(
+  '/users/:id',
+  {
+    errorHandler: (error, request, reply) => {
+      console.log({ error });
 
-  if(!body.name) {
-    return reply.code(400).send({
-      code: 'VALIDATION_ERROR',
-      message: 'any error message'
+      reply.code(400).send(error);
+    },
+  },
+  async (request: Request, reply) => {
+    const { body } = request;
+
+    if (!body.name) {
+      throw new Error('name is required');
+      // return reply.code(400).send({
+      //   code: 'VALIDATION_ERROR',
+      //   message: 'any error message',
+      // });
+    }
+
+    reply.headers({
+      hearer1: 'header 1 value',
+      hearer2: 'header 2 value',
     });
-  }
 
-  reply.headers({
-    'hearer1': 'header 1 value',
-    'hearer2': 'header 2 value',
-  });
+    console.log(reply.getHeaders());
 
-  console.log(reply.getHeaders());
-
-  reply.code(201).send({
-    id: randomUUID()
-  });
-});
+    reply.code(201).send({
+      id: randomUUID(),
+    });
+  },
+);
 
 async function main() {
   try {
