@@ -3,6 +3,11 @@ import { randomUUID } from 'node:crypto';
 
 const fastify = Fastify();
 
+fastify.setErrorHandler((error, request, reply) => {
+  console.log({ error });
+  reply.code(500).send({ error: 'Internal Server error' });
+});
+
 type Request = FastifyRequest<{
   Params: { id: string };
   Querystring: { page: string };
@@ -19,38 +24,22 @@ type Request = FastifyRequest<{
   };
 }>;
 
-fastify.post(
-  '/users/:id',
-  {
-    errorHandler: (error, request, reply) => {
-      console.log({ error });
+fastify.post('/users/:id', async (request: Request, reply) => {
+  const { body } = request;
 
-      reply.code(400).send(error);
-    },
-  },
-  async (request: Request, reply) => {
-    const { body } = request;
+  if (!body.name) {
+    throw new Error('name is required');
+  }
 
-    if (!body.name) {
-      throw new Error('name is required');
-      // return reply.code(400).send({
-      //   code: 'VALIDATION_ERROR',
-      //   message: 'any error message',
-      // });
-    }
+  reply.headers({
+    hearer1: 'header 1 value',
+    hearer2: 'header 2 value',
+  });
 
-    reply.headers({
-      hearer1: 'header 1 value',
-      hearer2: 'header 2 value',
-    });
-
-    console.log(reply.getHeaders());
-
-    reply.code(201).send({
-      id: randomUUID(),
-    });
-  },
-);
+  reply.code(201).send({
+    id: randomUUID(),
+  });
+});
 
 async function main() {
   try {
