@@ -1,5 +1,6 @@
 import { FastifyPluginAsync, FastifyRequest } from 'fastify';
 import { randomUUID } from 'node:crypto';
+import { createUserController } from '../controllers/create-user-controller';
 
 export const routes: FastifyPluginAsync<{ public: boolean }> = async (
   fastify,
@@ -10,12 +11,5 @@ export const routes: FastifyPluginAsync<{ public: boolean }> = async (
     console.log(`> Saving data for request ${request.id}`);
   });
 
-  fastify.post('/users/:id', async (request, reply) => {
-    fastify.sendAnalytics(request);
-    console.log(fastify.serverVersion);
-
-    reply.code(201).send({
-      id: randomUUID(),
-    });
-  });
+  fastify.post('/users/:id', createUserController);
 };

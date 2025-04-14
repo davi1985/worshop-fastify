@@ -8,6 +8,8 @@ fastify.register(routes, {
   public: true,
 });
 
+const hello = () => Math.random();
+console.log(hello());
 fastify.setErrorHandler((_, __, reply) => {
   reply.code(500).send({ error: 'Internal Server error' });
 });
