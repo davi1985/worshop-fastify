@@ -3,7 +3,7 @@ import { randomUUID } from 'node:crypto';
 
 const fastify = Fastify();
 
-fastify.setErrorHandler((error, request, reply) => {
+fastify.setErrorHandler((_, __, reply) => {
   reply.code(500).send({ error: 'Internal Server error' });
 });
 
